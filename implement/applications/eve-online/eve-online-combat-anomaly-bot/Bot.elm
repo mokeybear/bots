@@ -529,7 +529,7 @@ closeMessageBox readingFromGameClient =
 
 -- Define the Decision type (if it is not defined already)
 type Decision
-    = WarpToAnomaly TargetType  -- Replace `TargetType` with your actual target type (e.g., `Anomaly`)
+    = WarpToAnomaly Drone Squad  -- Replace `TargetType` with your actual target type (e.g., `Anomaly`)
     | NoOp
 
 -- Example of your warpToAnomaly function with the Decision type
