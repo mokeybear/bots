@@ -553,8 +553,8 @@ canWarpToAnomaly memory currentTime =
             currentTime - lastTime > cooldownTime  -- Check if the cooldown has passed
 
 -- Function to handle warping to an anomaly, including cooldown check
-warpToAnomaly : BotMemory -> Int -> Decision
-warpToAnomaly memory currentTime =
+attemptwarpToAnomaly : BotMemory -> Int -> Decision
+attemptwarpToAnomaly memory currentTime =
     if canWarpToAnomaly memory currentTime then
         { action = WarpToAnomaly selectedTarget  -- Replace `selectedTarget` with the actual target anomaly
         , memory = { memory | lastWarpTime = Just currentTime }
