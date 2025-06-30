@@ -303,6 +303,7 @@ type alias State =
 type alias BotMemory =
     { lastDockedStationNameFromInfoPanel : Maybe String
     , shipModules : ShipModulesMemory
+    , lastWarpTime : Maybe Int -- stores the timestamp of the last warp attempt
     , overviewWindows : OverviewWindowsMemory
     , shipWarpingInLastReading : Maybe Bool
     , visitedAnomalies : Dict.Dict String MemoryOfAnomaly
@@ -526,6 +527,27 @@ closeMessageBox readingFromGameClient =
                     )
             )
 
+-- Cooldown for warping to an anomaly (in milliseconds)
+cooldownTime = 5000 -- 5 seconds
+
+-- Function to check if enough time has passed since the last warp attempt
+canWarpToAnomaly : BotMemory -> Int -> Bool
+canWarpToAnomaly memory currentTime =
+    case memory.lastWarpTime of
+        Nothing -> 
+            True  -- Allow the first warp if no previous warp attempt exists
+        Just lastTime -> 
+            currentTime - lastTime > cooldownTime  -- Check if the cooldown has passed
+
+-- Function to handle warping to an anomaly, including cooldown check
+warpToAnomaly : BotMemory -> Int -> Decision
+warpToAnomaly memory currentTime =
+    if canWarpToAnomaly memory currentTime then
+        { action = WarpToAnomaly selectedTarget  -- Replace `selectedTarget` with the actual target anomaly
+        , memory = { memory | lastWarpTime = Just currentTime }
+        }
+    else
+        { action = NoOp, memory = memory }  -- Do nothing if the cooldown hasn't passed
 
 continueIfShouldHide : { ifShouldHide : DecisionPathNode } -> BotDecisionContext -> Maybe DecisionPathNode
 continueIfShouldHide config context =
@@ -948,6 +970,15 @@ decideNextActionWhenInSpace context shipUI =
 
         Nothing ->
             decideNextActionWhenInSpaceNotHiding context shipUI
+
+            decideNextAction : Context -> BotMemory -> Decision
+decideNextAction context memory =
+    let
+        currentTime = context.timeInMilliseconds  -- Get the current time
+    in
+        -- Check if it's time to warp to an anomaly
+        warpToAnomaly memory currentTime
+
 
 
 decideNextActionWhenInSpaceNotHiding :
