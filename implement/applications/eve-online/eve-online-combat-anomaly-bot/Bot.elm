@@ -971,15 +971,24 @@ decideNextActionWhenInSpace context shipUI =
         Nothing ->
             decideNextActionWhenInSpaceNotHiding context shipUI
 
-            decideNextAction : Context -> BotMemory -> Decision
+decideNextAction : Context -> BotMemory -> Decision
 decideNextAction context memory =
     let
-        currentTime = context.timeInMilliseconds  -- Get the current time
+        currentTime = context.timeInMilliseconds
     in
-        -- Check if it's time to warp to an anomaly
-        warpToAnomaly memory currentTime
+        case memory.lastWarpTime of
+            Just lastTime ->
+                if currentTime - lastTime > 5000 then
+                    { action = WarpToAnomaly selectedTarget
+                    , memory = { memory | lastWarpTime = Just currentTime }
+                    }
+                else
+                    { action = NoOp, memory = memory }
 
-
+            Nothing ->
+                { action = WarpToAnomaly selectedTarget
+                , memory = { memory | lastWarpTime = Just currentTime }
+                }
 
 decideNextActionWhenInSpaceNotHiding :
     BotDecisionContext
