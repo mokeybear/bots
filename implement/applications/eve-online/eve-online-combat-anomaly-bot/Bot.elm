@@ -527,6 +527,19 @@ closeMessageBox readingFromGameClient =
                     )
             )
 
+-- Define the Decision type (if it is not defined already)
+type Decision
+    = WarpToAnomaly TargetType  -- Replace `TargetType` with your actual target type (e.g., `Anomaly`)
+    | NoOp
+
+-- Example of your warpToAnomaly function with the Decision type
+warpToAnomaly : BotMemory -> Int -> Decision
+warpToAnomaly memory currentTime =
+    if canWarpToAnomaly memory currentTime then
+        WarpToAnomaly selectedTarget  -- Replace `selectedTarget` with the actual target
+    else
+        NoOp  -- Do nothing if the cooldown hasn't passed
+
 -- Cooldown for warping to an anomaly (in milliseconds)
 cooldownTime = 5000 -- 5 seconds
 
